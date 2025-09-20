@@ -1,0 +1,14 @@
+fastapi==0.100.0
+uvicorn[standard]==0.23.0
+SQLAlchemy==2.0.20
+alembic==1.11.1
+passlib[bcrypt]==1.7.4
+python-jose==3.3.0
+pydantic==1.10.11
+pytest==7.4.0
+httpx==0.24.1
+python-multipart==0.0.6
+# needed for pydantic EmailStr validation
+email-validator==2.0.0
+
+# Note: pinned versions are examples; you can relax them as needed.

@@ -1,0 +1,53 @@
+# Google Cloud Build pipeline for FastAPI + Alembic + Cloud Run
+# Prerequisites:
+# - Set _REGION, _PROJECT, _SERVICE, _CLOUDSQL_INSTANCE, _DB_USER, _DB_PASS, _DB_NAME, _SECRET_KEY as substitutions or in the UI
+# - Cloud SQL instance and database must exist
+# - Service account must have Cloud Run Admin, Cloud SQL Client, Artifact Registry Writer
+
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'gcr.io/${_PROJECT}/${_SERVICE}:$SHORT_SHA', '.' ]
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'push', 'gcr.io/${_PROJECT}/${_SERVICE}:$SHORT_SHA' ]
+
+- name: 'python:3.11'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      pip install alembic psycopg2-binary
+      export DATABASE_URL="postgresql+psycopg2://${_DB_USER}:${_DB_PASS}@/${_DB_NAME}?host=/cloudsql/${_CLOUDSQL_INSTANCE}"
+      alembic upgrade head
+  env:
+    - 'CLOUDSQL_INSTANCE=${_CLOUDSQL_INSTANCE}'
+    - 'DB_USER=${_DB_USER}'
+    - 'DB_PASS=${_DB_PASS}'
+    - 'DB_NAME=${_DB_NAME}'
+    - 'DATABASE_URL=postgresql+psycopg2://${_DB_USER}:${_DB_PASS}@/${_DB_NAME}?host=/cloudsql/${_CLOUDSQL_INSTANCE}'
+
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'gcloud'
+  args:
+    - 'run'
+    - 'deploy'
+    - '${_SERVICE}'
+    - '--image=gcr.io/${_PROJECT}/${_SERVICE}:$SHORT_SHA'
+    - '--region=${_REGION}'
+    - '--platform=managed'
+    - '--add-cloudsql-instances=${_CLOUDSQL_INSTANCE}'
+    - '--set-env-vars=DATABASE_URL=postgresql+psycopg2://${_DB_USER}:${_DB_PASS}@/${_DB_NAME}?host=/cloudsql/${_CLOUDSQL_INSTANCE},SECRET_KEY=${_SECRET_KEY}'
+    - '--allow-unauthenticated'
+
+images:
+- 'gcr.io/${_PROJECT}/${_SERVICE}:$SHORT_SHA'
+
+substitutions:
+  _REGION: 'us-central1'
+  _PROJECT: 'your-gcp-project-id'
+  _SERVICE: 'api-ecommerce'
+  _CLOUDSQL_INSTANCE: 'your-gcp-project-id:us-central1:your-sql-instance'
+  _DB_USER: 'your-db-user'
+  _DB_PASS: 'your-db-password'
+  _DB_NAME: 'your-db-name'
+  _SECRET_KEY: 'your-secret-key'
