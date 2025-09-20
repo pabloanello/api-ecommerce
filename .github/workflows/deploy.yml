@@ -29,11 +29,11 @@ jobs:
       #- name: Push Docker image
       #  run: |
       #    docker push gcr.io/$PROJECT_ID/$SERVICE:${{ github.sha }}
-      - name: Run Alembic migrations
-        run: |
-          pip install alembic psycopg2-binary
-          export DATABASE_URL="postgresql+psycopg2://$DB_USER:$DB_PASS@/$DB_NAME?host=/cloudsql/$CLOUDSQL_INSTANCE"
-          alembic upgrade head
+      #- name: Run Alembic migrations
+      #  run: |
+      #    pip install alembic psycopg2-binary
+      #    export DATABASE_URL="postgresql+psycopg2://$DB_USER:$DB_PASS@/$DB_NAME?host=/cloudsql/$CLOUDSQL_INSTANCE"
+      #    alembic upgrade head
       #- name: Deploy to Cloud Run
       #  run: |
       #    gcloud run deploy $SERVICE \
