@@ -1,3 +1,6 @@
+![Build Status](https://github.com/pabloanello/api-ecommerce/actions/workflows/ci.yml/badge.svg)
+![Build Status](https://github.com/pabloanello/api-ecommerce/actions/workflows/deploy.yml/badge.svg)
+
 # FastAPI E-commerce API
 
 Minimal e-commerce REST API built with FastAPI, SQLAlchemy and JWT authentication.
